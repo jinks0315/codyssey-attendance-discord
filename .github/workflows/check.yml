@@ -1,8 +1,6 @@
 name: Codyssey Attendance Alert
 
 on:
-  schedule:
-    - cron: "*/10 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -22,20 +20,22 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
 
       - name: Check attendance
         env:
-          CODYSSEY_USER_ID: ${{ secrets.CODYSSEY_USER_ID }}
-          CODYSSEY_PASSWORD: ${{ secrets.CODYSSEY_PASSWORD }}
-          CODYSSEY_MBR_ID: ${{ secrets.CODYSSEY_MBR_ID }}
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-        run: python check_attendance.py
+          USERS_JSON: ${{ secrets.USERS_JSON }}
+        run: |
+          python check_attendance.py
 
       - name: Commit state
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
+
           git add attendance_state.json || true
+
           git commit -m "update attendance state" || echo "No changes"
+
           git push || true
