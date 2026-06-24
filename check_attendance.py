@@ -65,37 +65,61 @@ if not sessions:
     print("오늘 세션 없음")
     exit(0)
 
-last_session = sessions[-1]
-
-current_state = {
-    "date": today,
-    "session_count": today_data.get("session_count"),
-    "entry_time": last_session.get("entry_time"),
-    "exit_time": last_session.get("exit_time"),
-    "daily_total_duration": today_data.get("daily_total_duration"),
+state = {
+    "notified": []
 }
-
-old_state = {}
 
 if os.path.exists(STATE_FILE):
     with open(STATE_FILE, "r", encoding="utf-8") as f:
-        old_state = json.load(f)
+        state = json.load(f)
 
-if current_state != old_state:
-    message = (
-        "📌 코디세이 출입 기록 변경 감지\n\n"
-        f"날짜: {current_state['date']}\n"
-        f"입실: {current_state['entry_time'] or '-'}\n"
-        f"퇴실: {current_state['exit_time'] or '-'}\n"
-        f"세션 수: {current_state['session_count']}\n"
-        f"누적 시간: {current_state['daily_total_duration']}"
-    )
+notified = set(state.get("notified", []))
 
-    requests.post(WEBHOOK, json={"content": message}, timeout=15)
+new_notifications = []
 
-    with open(STATE_FILE, "w", encoding="utf-8") as f:
-        json.dump(current_state, f, ensure_ascii=False, indent=2)
+for s in sessions:
+    session_no = s.get("session_no")
+    entry_time = s.get("entry_time")
+    exit_time = s.get("exit_time")
+    duration = s.get("duration")
 
-    print("알림 전송 완료")
-else:
-    print("변경 없음")
+    entry_id = f"{today}-session-{session_no}-entry-{entry_time}"
+    exit_id = f"{today}-session-{session_no}-exit-{exit_time}"
+
+    if entry_time and entry_id not in notified:
+        new_notifications.append({
+            "id": entry_id,
+            "message": (
+                "🟢 코디세이 입실 감지\n\n"
+                f"날짜: {today}\n"
+                f"세션: {session_no}\n"
+                f"입실: {entry_time}\n"
+                f"현재 누적: {today_data.get('daily_total_duration')}"
+            )
+        })
+
+    if exit_time and exit_id not in notified:
+        new_notifications.append({
+            "id": exit_id,
+            "message": (
+                "🔴 코디세이 퇴실 감지\n\n"
+                f"날짜: {today}\n"
+                f"세션: {session_no}\n"
+                f"퇴실: {exit_time}\n"
+                f"세션 시간: {duration}\n"
+                f"오늘 누적: {today_data.get('daily_total_duration')}"
+            )
+        })
+
+for item in new_notifications:
+    requests.post(WEBHOOK, json={"content": item["message"]}, timeout=15)
+    notified.add(item["id"])
+    print(f"알림 전송: {item['id']}")
+
+state["notified"] = sorted(notified)
+
+with open(STATE_FILE, "w", encoding="utf-8") as f:
+    json.dump(state, f, ensure_ascii=False, indent=2)
+
+if not new_notifications:
+    print("새 알림 없음")
