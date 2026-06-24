@@ -3,12 +3,18 @@ import json
 from datetime import datetime
 import requests
 
+now = datetime.now()
+
+if now.hour < 9 or now.hour >= 24:
+    print("운영 시간 아님")
+    exit(0)
+    
 USERS_JSON = os.environ["USERS_JSON"]
 STATE_FILE = "attendance_state.json"
 
 users = json.loads(USERS_JSON)
 
-now = datetime.now()
+
 year = now.strftime("%Y")
 month = now.strftime("%m")
 today = now.strftime("%Y-%m-%d")
