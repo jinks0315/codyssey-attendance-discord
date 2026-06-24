@@ -14,7 +14,7 @@ if now.weekday() >= 5:
 # 허용 시간
 allowed = (
     9 <= now.hour <= 13 or
-    20 <= now.hour <= 23
+    20 <= now.hour < 23
 )
 
 if not allowed:
