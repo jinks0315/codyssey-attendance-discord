@@ -6,7 +6,18 @@ import requests
 
 now = datetime.now(ZoneInfo("Asia/Seoul"))
 
-if now.hour < 9 or now.hour >= 24:
+# 주말 차단
+if now.weekday() >= 5:
+    print("주말")
+    exit(0)
+
+# 허용 시간
+allowed = (
+    9 <= now.hour <= 13 or
+    20 <= now.hour <= 23
+)
+
+if not allowed:
     print("운영 시간 아님")
     exit(0)
     
