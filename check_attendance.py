@@ -1,9 +1,10 @@
 import os
 import json
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import requests
 
-now = datetime.now()
+now = datetime.now(ZoneInfo("Asia/Seoul"))
 
 if now.hour < 9 or now.hour >= 24:
     print("운영 시간 아님")
