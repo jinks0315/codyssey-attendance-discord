@@ -4,5 +4,9 @@
     "1000283057-2026-06-24-session-2-entry-10:26:04",
     "1000285048-2026-06-24-session-1-entry-10:25:53",
     "2026-06-24-session-1-entry-10:25:53"
-  ]
+  ],
+  "sessions": {
+    "1000285048": "MDQwNmU3MzQtZDI2Yi00OGI2LThiOTAtNWJhNzI1YmNlMzBi",
+    "1000283057": "NjAwZDNlYjQtYTQxOC00ZjU0LTg4N2EtMGVhY2I1ZWExNTUy"
+  }
 }
